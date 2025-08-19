@@ -1,6 +1,10 @@
 package database
 
-import "database/sql"
+import (
+	"context"
+	"database/sql"
+	"time"
+)
 
 type UserModel struct {
 	DB *sql.DB 
@@ -14,4 +18,13 @@ type User struct{
 	// tells JSON library to always ignore this field when converting the struct back into JSON
 	// to prevent from accidentally sending a user's password hash back to the client.
 	Password string `json:"-"`
+}
+
+func (m *UserModel) Insert(user *User) error{
+	ctx, cancel := context.WithTimeout(context.Background(), 3 * time.Second)
+	defer cancel()
+
+	query := "INSERT INTO users (email, password, name) VALUES ($1, $2, $3) RETURNING id"
+
+	return m.DB.QueryRowContext(ctx, query, user.Email, user.Password, user.Name).Scan(&user.Id)
 }
