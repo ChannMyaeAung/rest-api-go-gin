@@ -1,6 +1,9 @@
 To Register a user: 
 curl -X POST http://localhost:8080/api/v1/auth/register -H "Content-Type: application/json" -d '{"email": "test@example.com", "password": "password", "name": "Test User"}' -w "\nHTTP Status: %{http_code}\n"
 
+To Login:
+curl -X POST http://localhost:8080/api/v1/auth/login -H "Content-Type: application/json" -d '{"email": "test@example.com", "password": "password"}' -w "\nHTTP Status: %{http_code}\n"
+
 To Register an event:
 curl -X POST http://localhost:8080/api/v1/events -H "Content-Type: application/json" -d '{"name": "Go Conference", "ownerId" :1, "description": "A conference about Go programming", "date": "2025-05-20", "location": "San Francisco"}' -w "\nHTTP Status: %{http_code}\n"
 
@@ -15,3 +18,6 @@ curl -X PUT http://localhost:8080/api/v1/events/1 -H "Content-Type: application/
 
 To Delete an event:
 PS E:\VS Code Projects\Go Projects\rest-api-go-gin> curl -X DELETE http://localhost:8080/api/v1/events/1 -H "Content-Type: application/json" -w "\nHTTP Status: %{http_code}\n"
+
+To Check all attendees of an event (using event id):
+curl -X GET http://localhost:8080/api/v1/events/2/attendees -H "Content-Type: application/json" -w "\nHTTP Status: %{http_code}\n"
