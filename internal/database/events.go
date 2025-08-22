@@ -14,7 +14,7 @@ type EventModel struct {
 // Binding is the process of automatically parsing the incoming request data and mapping it into a Go struct.
 type Event struct{
 	Id int `json:"id"`
-	OwnerId int `json:"ownerId" binding:"required"`
+	OwnerId int `json:"ownerId"`
 	Name string `json:"name" binding:"required,min=3"`
 	Description string `json:"description" binding:"required,min=10"`
 	Date string `json:"date" binding:"required"`
