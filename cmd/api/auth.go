@@ -10,15 +10,19 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// registerRequest defines the expected JSON structure for user registration requests.
+// All fields are required and validated using Gin's binding tags.
 type registerRequest struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,min=8"`
-	Name     string `json:"name" binding:"required,min=2"`
+	Email    string `json:"email" binding:"required,email"`      // Must be valid email format
+	Password string `json:"password" binding:"required,min=8"`   // Minimum 8 characters for security
+	Name     string `json:"name" binding:"required,min=2"`       // Minimum 2 characters for user display name
 }
 
+// loginRequest defines the expected JSON structure for user authentication requests.
+// Contains credentials needed for user login validation.
 type loginRequest struct{
-	Email string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,min=8"`
+	Email    string `json:"email" binding:"required,email"`      // User's registered email address
+	Password string `json:"password" binding:"required,min=8"`   // User's plaintext password for verification
 }
 
 // loginResponse defines the JSON structure returned upon successful authentication.
@@ -31,19 +35,17 @@ type loginResponse struct{
 // It validates user credentials against the database and returns a JWT token upon success.
 // The returned token should be included in the Authorization header for protected endpoints.
 //
-// Request body should contain JSON with email and password fields.
-// Password is compared against the stored bcrypt hash for security.
-//
-// Returns:
-//   - 200 OK with JWT token on successful authentication
-//   - 400 Bad Request for invalid JSON structure or validation failures
-//   - 401 Unauthorized for invalid credentials (wrong email/password)
-//   - 500 Internal Server Error on database or token generation failures
-//
-// Security considerations:
-//   - Uses bcrypt for secure password comparison
-//   - Returns generic error message to prevent email enumeration attacks
-//   - JWT token expires after 72 hours
+// @Summary User login
+// @Description Authenticate user with email and password, returns JWT token
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param credentials body loginRequest true "Login credentials"
+// @Success 200 {object} loginResponse "Login successful with JWT token"
+// @Failure 400 {object} gin.H "Invalid request body"
+// @Failure 401 {object} gin.H "Invalid credentials"
+// @Failure 500 {object} gin.H "Internal server error"
+// @Router /api/v1/auth/login [post]
 func (app *application) login(c *gin.Context){
 	var auth loginRequest
 	if err := c.ShouldBindJSON(&auth); err != nil {
@@ -91,18 +93,16 @@ func (app *application) login(c *gin.Context){
 // It validates input data, hashes the password securely, and creates a new user record.
 // Passwords are hashed using bcrypt before storage for security.
 //
-// Request body should contain JSON with email, password, and name fields.
-// Email must be unique (enforced by database constraints).
-//
-// Returns:
-//   - 201 Created with success message and user data (password excluded from response)
-//   - 400 Bad Request for invalid JSON structure or validation failures
-//   - 500 Internal Server Error on password hashing or database failures
-//
-// Security considerations:
-//   - Passwords are hashed with bcrypt using default cost (currently 10)
-//   - User password is excluded from JSON response via struct tags
-//   - Email uniqueness should be enforced by database constraints
+// @Summary User registration
+// @Description Register a new user account with email, password, and name
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param user body registerRequest true "User registration data"
+// @Success 201 {object} gin.H "User registered successfully"
+// @Failure 400 {object} gin.H "Invalid request body or validation errors"
+// @Failure 500 {object} gin.H "Internal server error"
+// @Router /api/v1/auth/register [post]
 func (app *application) registerUser(c *gin.Context) {
 	var register registerRequest
 	if err := c.ShouldBindJSON(&register); err != nil {

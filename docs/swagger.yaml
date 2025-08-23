@@ -1,4 +1,13 @@
 definitions:
+  database.Attendee:
+    properties:
+      eventId:
+        type: integer
+      id:
+        type: integer
+      userId:
+        type: integer
+    type: object
   database.Event:
     properties:
       date:
@@ -22,12 +31,124 @@ definitions:
     - location
     - name
     type: object
+  database.User:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  gin.H:
+    additionalProperties: {}
+    type: object
+  main.loginRequest:
+    properties:
+      email:
+        description: User's registered email address
+        type: string
+      password:
+        description: User's plaintext password for verification
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  main.loginResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  main.registerRequest:
+    properties:
+      email:
+        description: Must be valid email format
+        type: string
+      name:
+        description: Minimum 2 characters for user display name
+        minLength: 2
+        type: string
+      password:
+        description: Minimum 8 characters for security
+        minLength: 8
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
 info:
   contact: {}
   description: A rest API in Go using Gin framework
   title: Go Gin Rest API
   version: "1.0"
 paths:
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with email and password, returns JWT token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/main.loginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful with JWT token
+          schema:
+            $ref: '#/definitions/main.loginResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/gin.H'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: User login
+      tags:
+      - Authentication
+  /api/v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user account with email, password, and name
+      parameters:
+      - description: User registration data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/main.registerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User registered successfully
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Invalid request body or validation errors
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: User registration
+      tags:
+      - Authentication
   /api/v1/events:
     get:
       consumes:
@@ -43,6 +164,359 @@ paths:
       summary: Returns all events
       tags:
       - Events
+    post:
+      consumes:
+      - application/json
+      description: Create a new event with the provided details. Requires authentication.
+      parameters:
+      - description: Event data
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/database.Event'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Event created successfully
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/gin.H'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: Create a new event
+      tags:
+      - Events
+  /api/v1/events/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an event from the database. Only the event owner can delete
+        their event.
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Event deleted successfully
+        "400":
+          description: Invalid event ID
+          schema:
+            $ref: '#/definitions/gin.H'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: Forbidden - not event owner
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Event not found
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: Delete an event
+      tags:
+      - Events
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a specific event by its ID
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Event details
+          schema:
+            $ref: '#/definitions/database.Event'
+        "400":
+          description: Invalid event ID
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Event not found
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Get event by ID
+      tags:
+      - Events
+    put:
+      consumes:
+      - application/json
+      description: Update an existing event. Only the event owner can update their
+        event.
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated event data
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/database.Event'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated event
+          schema:
+            $ref: '#/definitions/database.Event'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: Forbidden - not event owner
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Event not found
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: Update an event
+      tags:
+      - Events
+  /api/v1/events/{id}/attendees:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all users registered as attendees for a specific event
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of attendees
+          schema:
+            items:
+              $ref: '#/definitions/database.User'
+            type: array
+        "400":
+          description: Invalid event ID
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Get attendees for event
+      tags:
+      - Events
+  /api/v1/events/{id}/attendees/{userId}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a user's registration from an event. Only the event owner
+        can remove attendees.
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User ID to remove from attendees
+        in: path
+        name: userId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Attendee removed successfully
+        "400":
+          description: Invalid event or user ID
+          schema:
+            $ref: '#/definitions/gin.H'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: Forbidden - not event owner
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Event not found
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: Remove attendee from event
+      tags:
+      - Events
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all events that a specific user is registered for as an
+        attendee
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User/Attendee ID
+        in: path
+        name: userId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of events user is attending
+          schema:
+            items:
+              $ref: '#/definitions/database.Event'
+            type: array
+        "400":
+          description: Invalid attendee ID
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Get events by attendee
+      tags:
+      - Events
+    post:
+      consumes:
+      - application/json
+      description: Register a user as an attendee for a specific event. Only the event
+        owner can add attendees.
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User ID to add as attendee
+        in: path
+        name: userId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Attendee added successfully
+          schema:
+            $ref: '#/definitions/database.Attendee'
+        "400":
+          description: Invalid event or user ID
+          schema:
+            $ref: '#/definitions/gin.H'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: Forbidden - not event owner
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Event or user not found
+          schema:
+            $ref: '#/definitions/gin.H'
+        "409":
+          description: User already an attendee
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: Add attendee to event
+      tags:
+      - Events
+  /api/v1/users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a specific user's information by their ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User information
+          schema:
+            $ref: '#/definitions/database.User'
+        "400":
+          description: Invalid user ID
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Get user by ID
+      tags:
+      - Users
 securityDefinitions:
   BearerAuth:
     description: Enter your bearer token in the format **Bearer &lt;token&gt;**
