@@ -3,7 +3,8 @@ export type Event = {
   id: number;
   name: string;
   location: string;
-  dateTime: string; // ISO string
+  date: Date; // ISO string
+  description: string;
   ownerId: number;
 };
 export type Attendee = { id: number; name: string; email: string };

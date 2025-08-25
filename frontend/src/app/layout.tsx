@@ -41,7 +41,7 @@ export default function RootLayout({
             <div className="relative flex min-h-screen flex-col">
               <Navbar />
               <div className="flex-1">
-                <main className="container py-8">{children}</main>
+                <main className="container mx-auto py-8">{children}</main>
               </div>
             </div>
             <Toaster richColors closeButton />

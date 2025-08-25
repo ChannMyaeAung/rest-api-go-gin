@@ -125,11 +125,23 @@ func (app *application) registerUser(c *gin.Context) {
 		Name: register.Name,
 	}
 
+	// Generate JWT token for newly registered user 
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"userId": user.Id,
+		"exp": time.Now().Add(time.Hour * 72).Unix(),
+	})
+
+	tokenString, err := token.SignedString([]byte(app.jwtSecret))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})	
+		return 
+	}
+
 	err = app.models.Users.Insert(&user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register user"})
 		return 
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully", "user": user})
+	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully", "user": user, "token": tokenString})
 }
