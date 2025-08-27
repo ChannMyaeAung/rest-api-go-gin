@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api, getApiError } from "@/lib/api";
 import { Event, User } from "@/lib/types";
-import { ArrowLeft, CalendarDays, MapPin, Users } from "lucide-react";
+import { ArrowLeft, CalendarDays, MapPin, Trash2, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -29,10 +29,12 @@ export default function EventDetailPage() {
     error,
     mutate,
   } = useSWR<Event>(`/events/${id}`, fetcher);
-  const { data: attendees, mutate: mutateAtt } = useSWR<User[]>(
-    `/events/${id}/attendees`,
-    fetcher
-  );
+  const {
+    data: attendees,
+    error: attendeesError,
+    isLoading: attendeesLoading,
+    mutate: mutateAtt,
+  } = useSWR<User[]>(`/events/${id}/attendees`, fetcher);
   if (error) toast.error(getApiError(error));
 
   const formatEventDate = (dateString: string) => {
@@ -138,11 +140,22 @@ export default function EventDetailPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              <Button asChild variant="outline">
+              <Button
+                asChild
+                variant="outline"
+                className="hover:bg-gray-50 transition-colors"
+              >
                 <Link href={`/events/${id}/edit`}>Edit Event</Link>
               </Button>
-              <Button variant="destructive" onClick={remove}>
+              <Button
+                variant="destructive"
+                onClick={remove}
+                className="hover:bg-red-600 transition-all duration-200 cursor-pointer shadow-md hover:shadow-lg hover:border-red-400 group relative overflow-hidden"
+              >
+                <Trash2 className="w-4 h-4 mr-2 group-hover:animate-pulse" />
                 Delete Event
+                {/* Optional: Add a subtle glow effect */}
+                <div className="absolute inset-0 bg-red-400 opacity-0 group-hover:opacity-20 transition-opacity duration-200 rounded" />
               </Button>
             </div>
           </div>
@@ -184,18 +197,30 @@ export default function EventDetailPage() {
               <CardTitle>Attendees ({attendees?.length || 0})</CardTitle>
             </div>
             <Button asChild size="sm">
-              <Link href={`/events/${id}add-attendee`}>Add Attendee</Link>
+              <Link href={`/events/${id}/add-attendee`}>Add Attendee</Link>
             </Button>
           </div>
         </CardHeader>
 
         <CardContent>
-          {!attendees ? (
+          {attendeesLoading ? (
             <div className="flex items-center gap-2 text-muted-foreground">
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
               <span>Loading attendees...</span>
             </div>
-          ) : attendees.length === 0 ? (
+          ) : attendeesError ? (
+            <div className="text-center py-8 text-red-500">
+              <p>Failed to load attendees</p>
+              <Button
+                onClick={() => mutateAtt()}
+                size="sm"
+                variant="outline"
+                className="mt-2"
+              >
+                Retry
+              </Button>
+            </div>
+          ) : !attendees || attendees.length === 0 ? (
             <div className="text-center py-8">
               <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground">No attendees yet</p>
@@ -206,6 +231,7 @@ export default function EventDetailPage() {
               </Button>
             </div>
           ) : (
+            // ✅ Show when we have attendees
             <div className="space-y-2">
               {attendees.map((attendee) => (
                 <div

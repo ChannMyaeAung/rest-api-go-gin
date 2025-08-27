@@ -181,7 +181,6 @@ func (m *EventModel) Get(id int) (*Event, error){
     return &event, nil 
 }
 
-// Update, Delete methods remain the same...
 func (m *EventModel) Update(event *Event) error{
     ctx, cancel := context.WithTimeout(context.Background(), 3 * time.Second)
     defer cancel()

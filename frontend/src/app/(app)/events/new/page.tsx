@@ -45,7 +45,7 @@ export default function NewEventPage() {
       console.log("API response:", data); // Debug log
 
       toast.success("Event created successfully!");
-      router.push(`/events/${data.id}`);
+      router.push(`/events/${data.event.id}`);
     } catch (e) {
       console.error("Error creating event:", e); // Debug log
       toast.error(getApiError(e));
@@ -59,7 +59,6 @@ export default function NewEventPage() {
         <Button asChild variant="ghost" size="sm">
           <Link href="/events">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Events
           </Link>
         </Button>
         <h1 className="text-2xl font-bold">Create New Event</h1>
