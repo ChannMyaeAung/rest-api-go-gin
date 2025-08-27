@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -44,6 +45,11 @@ func (app *application) routes() http.Handler {
 		authGroup.POST("/events/:id/attendees/:userId", app.addAttendeeToEvent)
 		authGroup.DELETE("/events/:id/attendees/:userId", app.deleteAttendeeFromEvent)
 	}
+
+	// Health check endpoint
+	g.GET("/health", func(c *gin.Context){
+		c.JSON(http.StatusOK, gin.H{"status": "ok", "timestamp": time.Now()})
+	})
 
 	g.GET("/swagger/*any", func(c *gin.Context){
 		if c.Request.RequestURI == "/swagger/"{

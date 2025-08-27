@@ -29,7 +29,7 @@ export default function EventsPage() {
   /**
    * Format date to human-readable format
    */
-  const formatEventDate = (dateString: Date) => {
+  const formatEventDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
       weekday: "short",

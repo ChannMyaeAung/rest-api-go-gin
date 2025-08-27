@@ -15,5 +15,5 @@ export const eventSchema = z.object({
   name: z.string().min(2),
   description: z.string().min(10),
   location: z.string().min(2),
-  date: z.date(),
+  date: z.string().min(2),
 });
