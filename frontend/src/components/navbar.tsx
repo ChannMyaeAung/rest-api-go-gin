@@ -34,18 +34,18 @@ export function Navbar() {
           </Link>
 
           <nav className="flex items-center gap-4 text-sm lg:gap-6">
-            <Link
-              href="/events"
-              className={`transition-colors hover:text-foreground/80 ${
-                pathname?.startsWith("/events") && pathname !== "/events/new"
-                  ? "text-foreground"
-                  : "text-foreground/60"
-              }`}
-            >
-              Events
-            </Link>
-
-            {/* Create Event Link - Shows immediately when auth state changes */}
+            {isAuthed && (
+              <Link
+                href="/events"
+                className={`transition-colors hover:text-foreground/80 ${
+                  pathname?.startsWith("/events") && pathname !== "/events/new"
+                    ? "text-foreground"
+                    : "text-foreground/60"
+                }`}
+              >
+                Events
+              </Link>
+            )}
             {!isLoading && isAuthed && (
               <Link
                 href="/events/new"

@@ -185,7 +185,6 @@ export default function EventsPage() {
                       </div>
                     </div>
 
-                    {/* ✅ FIXED: Removed card hover effects from button */}
                     <Button
                       asChild
                       variant="outline"
