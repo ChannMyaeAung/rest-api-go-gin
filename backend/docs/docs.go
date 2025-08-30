@@ -115,6 +115,11 @@ const docTemplate = `{
         },
         "/api/v1/events": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Returns all events",
                 "consumes": [
                     "application/json"
@@ -193,6 +198,11 @@ const docTemplate = `{
         },
         "/api/v1/events/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve a specific event by its ID",
                 "consumes": [
                     "application/json"
@@ -379,6 +389,11 @@ const docTemplate = `{
         },
         "/api/v1/events/{id}/attendees": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve all users registered as attendees for a specific event",
                 "consumes": [
                     "application/json"
@@ -426,6 +441,11 @@ const docTemplate = `{
         },
         "/api/v1/events/{id}/attendees/{userId}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve all events that a specific user is registered for as an attendee",
                 "consumes": [
                     "application/json"
@@ -627,6 +647,11 @@ const docTemplate = `{
         },
         "/api/v1/users/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve a specific user's information by their ID",
                 "consumes": [
                     "application/json"

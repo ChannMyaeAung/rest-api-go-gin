@@ -6,6 +6,8 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func (app *application) routes() http.Handler {
@@ -47,6 +49,9 @@ func (app *application) routes() http.Handler {
         auth.PUT("/events/:id", app.updateEvent)
         auth.DELETE("/events/:id", app.deleteEvent)
     }
+
+    // Swagger documentation
+    g.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
     return g
 }

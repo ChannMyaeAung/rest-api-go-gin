@@ -15,6 +15,7 @@ import (
 // @Tags Users
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path int true "User ID"
 // @Success 200 {object} database.User "User information"
 // @Failure 400 {object} gin.H "Invalid user ID"

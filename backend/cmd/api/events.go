@@ -52,7 +52,8 @@ func (app *application) createEvent(c *gin.Context){
 // @Description Returns all events
 // @Tags Events
 // @Accept json 
-// @Product json 
+// @Produce json 
+// @Security BearerAuth
 // @Success 200 {object} []database.Event 
 // @Router /api/v1/events [get]
 func (app *application) getAllEvents(c *gin.Context){
@@ -76,6 +77,7 @@ func (app *application) getAllEvents(c *gin.Context){
 // @Tags Events
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path int true "Event ID"
 // @Success 200 {object} database.Event "Event details"
 // @Failure 400 {object} gin.H "Invalid event ID"
@@ -321,6 +323,7 @@ func (app *application) addAttendeeToEvent(c *gin.Context){
 // @Tags Events
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path int true "Event ID"
 // @Success 200 {array} database.User "List of attendees"
 // @Failure 400 {object} gin.H "Invalid event ID"
@@ -410,6 +413,7 @@ func (app *application) deleteAttendeeFromEvent(c *gin.Context){
 // @Tags Events
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path int true "Event ID"
 // @Param userId path int true "User/Attendee ID"
 // @Success 200 {array} database.Event "List of events user is attending"
