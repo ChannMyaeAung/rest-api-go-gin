@@ -22,6 +22,9 @@ type User struct{
 	// tells JSON library to always ignore this field when converting the struct back into JSON
 	// to prevent from accidentally sending a user's password hash back to the client.
 	Password string `json:"-"`
+	ProfilePicture *string `json:"profile_picture,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 <<<<<<< HEAD
