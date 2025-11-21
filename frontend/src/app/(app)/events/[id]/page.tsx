@@ -24,11 +24,15 @@ export default function EventDetailPage() {
   // - User reconnects to internet
   // - Component refocuses
   // - Every X seconds (configurable)
+<<<<<<< HEAD
   const {
     data: event,
     error,
     mutate,
   } = useSWR<Event>(`/events/${id}`, fetcher);
+=======
+  const { data: event, error } = useSWR<Event>(`/events/${id}`, fetcher);
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
   const {
     data: attendees,
     error: attendeesError,

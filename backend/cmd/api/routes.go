@@ -21,6 +21,13 @@ func (app *application) routes() http.Handler {
         MaxAge:           12 * time.Hour,
     }))
 
+<<<<<<< HEAD
+=======
+    g.GET("/", func(c *gin.Context){
+        c.JSON(http.StatusOK, gin.H{"message": "Welcome to the Event Management API", "docs": "/swagger/index.html"})
+    })
+
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
     // Health + auth (public)
     v1 := g.Group("/api/v1")
     {
@@ -29,6 +36,10 @@ func (app *application) routes() http.Handler {
         })
         v1.POST("/auth/register", app.registerUser)
         v1.POST("/auth/login", app.login)
+<<<<<<< HEAD
+=======
+        v1.DELETE("/auth/me", app.deleteCurrentUser)
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
     }
 
     // Protected group (requires JWT)

@@ -4,15 +4,35 @@ import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "./ui/button";
+<<<<<<< HEAD
 import { LogIn, LogOut, Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+=======
+import { LogIn, LogOut, Moon, Settings, Sun } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { is } from "zod/v4/locales";
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 
 export function Navbar() {
   const { theme, setTheme } = useTheme();
   const pathname = usePathname();
+<<<<<<< HEAD
   const router = useRouter();
   const { isAuthed, isLoading, logout } = useAuth();
+=======
+  const { isAuthed, isLoading, logout, user } = useAuth();
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -21,12 +41,20 @@ export function Navbar() {
 
   function handleLogout() {
     logout();
+<<<<<<< HEAD
     router.push("/login");
   }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
       <div className="mx-auto flex h-14 max-w-screen-2xl items-center px-4 md:px-6 lg:px-8">
+=======
+  }
+
+  return (
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 px-6">
+      <div className="mx-auto flex h-14 max-w-screen-2xl items-center md:px-6 lg:px-8">
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
         {/* Desktop Navigation Section */}
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
@@ -104,10 +132,74 @@ export function Navbar() {
                   </Link>
                 </Button>
               ) : (
+<<<<<<< HEAD
                 <Button size="sm" variant="outline" onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
                   Logout
                 </Button>
+=======
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <Avatar>
+                      <AvatarImage
+                        src={
+                          "https://www.htgtrading.co.uk/wp-content/uploads/2016/03/no-user-image-square.jpg"
+                        }
+                        alt="User Avatar"
+                      />
+                      <AvatarFallback>
+                        <span className="sr-only">User Menu</span>
+                        <AvatarImage
+                          src={
+                            "https://www.htgtrading.co.uk/wp-content/uploads/2016/03/no-user-image-square.jpg"
+                          }
+                          alt="User Avatar"
+                        />
+                      </AvatarFallback>
+                    </Avatar>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-semibold">
+                          User #{user?.id ?? "-"}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {user?.email ?? "No email available"}
+                        </span>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem>
+                        <Button size="sm" variant="ghost">
+                          <Link
+                            href="/settings"
+                            className="flex items-center gap-1"
+                          >
+                            <Settings className="mr-2 h-4 w-4" />
+                            Settings
+                          </Link>
+                        </Button>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={handleLogout}
+                        >
+                          <Link
+                            href={"/login"}
+                            className="flex items-center gap-1"
+                          >
+                            <LogOut className="mr-2 h-4 w-4 text-destructive" />
+                            <span className="text-destructive">Log out</span>
+                          </Link>
+                        </Button>
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
               )
             ) : (
               <Button asChild size="sm" disabled>

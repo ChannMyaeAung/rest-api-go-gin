@@ -1,6 +1,10 @@
 "use client";
 import { api, getApiError } from "@/lib/api";
+<<<<<<< HEAD
 import { useState } from "react";
+=======
+import { useEffect, useMemo, useState } from "react";
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 import { Event } from "@/lib/types";
 import { toast } from "sonner";
 import useSWR from "swr";
@@ -9,12 +13,18 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+<<<<<<< HEAD
 import { CalendarDays, MapPin, Plus, Search } from "lucide-react";
+=======
+import { CalendarDays, MapPin, Plus, Search, Trash2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 
 const fetcher = (url: string) => api.get(url).then((r) => r.data);
 
 export default function EventsPage() {
   const [q, setQ] = useState("");
+<<<<<<< HEAD
   const { data, error, mutate, isLoading } = useSWR<Event[]>(
     `/events`,
     fetcher
@@ -25,6 +35,40 @@ export default function EventsPage() {
   const events = (data || []).filter((e) =>
     e.name.toLowerCase().includes(q.toLowerCase())
   );
+=======
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const { isAuthed, logout } = useAuth();
+  const { data, error, mutate, isLoading } = useSWR<Event[]>(
+    isAuthed ? `/events` : null,
+    fetcher
+  );
+
+  useEffect(() => {
+    if (error) toast.error(getApiError(error));
+  }, [error, isAuthed]);
+
+  const events = useMemo(() => {
+    return (data || []).filter((e) =>
+      e.name.toLowerCase().includes(q.toLowerCase())
+    );
+  }, [data, q]);
+
+  const handleDelete = async (eventId: number, eventName: string) => {
+    if (!window.confirm(`Delete "${eventName}"? This action cannot be undone.`))
+      return;
+
+    try {
+      setDeletingId(eventId);
+      await api.delete(`/events/${eventId}`);
+      toast.success("Event deleted successfully");
+      mutate();
+    } catch (e) {
+      toast.error(getApiError(e));
+    } finally {
+      setDeletingId(null);
+    }
+  };
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 
   /**
    * Format date to human-readable format
@@ -142,7 +186,11 @@ export default function EventsPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {events.map((ev) => {
+<<<<<<< HEAD
               const eventStatus = getEventStatus(ev.date.toLocaleString());
+=======
+              const eventStatus = getEventStatus(ev.date);
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 
               return (
                 <Card
@@ -185,6 +233,7 @@ export default function EventsPage() {
                       </div>
                     </div>
 
+<<<<<<< HEAD
                     <Button
                       asChild
                       variant="outline"
@@ -192,6 +241,26 @@ export default function EventsPage() {
                     >
                       <Link href={`/events/${ev.id}`}>View Details</Link>
                     </Button>
+=======
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        asChild
+                        variant="outline"
+                        className="w-full hover:bg-primary hover:text-primary-foreground transition-colors"
+                      >
+                        <Link href={`/events/${ev.id}`}>View Details</Link>
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        className="w-full text-destructive hover:text-destructive"
+                        onClick={() => handleDelete(ev.id, ev.name)}
+                        disabled={deletingId === ev.id}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        {deletingId === ev.id ? "Deleting..." : "Delete"}
+                      </Button>
+                    </div>
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
                   </CardContent>
                 </Card>
               );

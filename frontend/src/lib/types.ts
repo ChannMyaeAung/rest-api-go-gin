@@ -1,3 +1,13 @@
+<<<<<<< HEAD
+=======
+export type AuthUser = {
+  id: number;
+  email: string;
+  name?: string;
+  profile_picture?: string | null;
+};
+
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 export type User = { id: number; email: string; name: string };
 export type Event = {
   id: number;

@@ -24,12 +24,20 @@ import (
 // @Failure 500 {object} gin.H "Internal server error"
 // @Security BearerAuth
 // @Router /api/v1/events [post]
+<<<<<<< HEAD
 func (app *application) createEvent(c *gin.Context){
+=======
+func (app *application) createEvent(c *gin.Context) {
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 	var event database.Event
 
 	if err := c.ShouldBindJSON(&event); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+<<<<<<< HEAD
 		return 
+=======
+		return
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 	}
 
 	user := app.getUserFromContext(c)
@@ -38,9 +46,15 @@ func (app *application) createEvent(c *gin.Context){
 	// Insert the event into the database
 	err := app.models.Events.Insert(&event)
 
+<<<<<<< HEAD
 	if err != nil{
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create event"})
 		return 
+=======
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create event"})
+		return
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "Event created successfully", "event": event})
@@ -51,6 +65,7 @@ func (app *application) createEvent(c *gin.Context){
 // @Summary Returns all events
 // @Description Returns all events
 // @Tags Events
+<<<<<<< HEAD
 // @Accept json 
 // @Produce json 
 // @Security BearerAuth
@@ -64,6 +79,23 @@ func (app *application) getAllEvents(c *gin.Context){
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve events"})
 		return 
 	}	
+=======
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} []database.Event
+// @Router /api/v1/events [get]
+func (app *application) getAllEvents(c *gin.Context) {
+	user := app.getUserFromContext(c)
+
+	// Fetch events owned by the authenticated user
+	events, err := app.models.Events.GetAllByOwner(user.Id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve events"})
+		return
+	}
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 
 	// Return events as JSON array
 	c.JSON(http.StatusOK, events)
@@ -84,6 +116,7 @@ func (app *application) getAllEvents(c *gin.Context){
 // @Failure 404 {object} gin.H "Event not found"
 // @Failure 500 {object} gin.H "Internal server error"
 // @Router /api/v1/events/{id} [get]
+<<<<<<< HEAD
 func (app *application) getEventByID(c *gin.Context){
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil{
@@ -91,17 +124,41 @@ func (app *application) getEventByID(c *gin.Context){
 		return 
 	}
 
+=======
+func (app *application) getEventByID(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID"})
+		return
+	}
+
+	user := app.getUserFromContext(c)
+
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 	// Fetch event from database by ID
 	event, err := app.models.Events.Get(id)
 
 	if event == nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Event not found"})
+<<<<<<< HEAD
 		return 
+=======
+		return
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 	}
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve event"})
+<<<<<<< HEAD
 		return 
+=======
+		return
+	}
+
+	if event.OwnerId != user.Id {
+		c.JSON(http.StatusForbidden, gin.H{"error": "You do not have permission to view this event"})
+		return
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 	}
 
 	c.JSON(http.StatusOK, event)
@@ -127,9 +184,15 @@ func (app *application) getEventByID(c *gin.Context){
 // @Failure 500 {object} gin.H "Internal server error"
 // @Security BearerAuth
 // @Router /api/v1/events/{id} [put]
+<<<<<<< HEAD
 func (app *application) updateEvent(c *gin.Context){
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil{
+=======
+func (app *application) updateEvent(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID"})
 		return
 	}
@@ -138,17 +201,30 @@ func (app *application) updateEvent(c *gin.Context){
 
 	// Verify the event exists before attempting update
 	existingEvent, err := app.models.Events.Get(id)
+<<<<<<< HEAD
 	if err != nil{
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve event"})
 		return 
+=======
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve event"})
+		return
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 	}
 
 	if existingEvent == nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Event not found"})
+<<<<<<< HEAD
 		return 
 	}
 
 	if existingEvent.OwnerId != user.Id{
+=======
+		return
+	}
+
+	if existingEvent.OwnerId != user.Id {
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 		c.JSON(http.StatusForbidden, gin.H{"error": "You do not have permission to update this event"})
 		return
 	}
@@ -158,6 +234,7 @@ func (app *application) updateEvent(c *gin.Context){
 
 	if err := c.ShouldBindJSON(updatedEvent); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+<<<<<<< HEAD
 		return 
 	}
 
@@ -168,6 +245,19 @@ func (app *application) updateEvent(c *gin.Context){
 	if err := app.models.Events.Update(updatedEvent); err != nil{
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update event"})
 		return 
+=======
+		return
+	}
+
+	// Ensure ownership can't change during update
+	updatedEvent.Id = id
+	updatedEvent.OwnerId = user.Id
+
+	// Update the event in the database
+	if err := app.models.Events.Update(updatedEvent); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update event"})
+		return
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 	}
 
 	c.JSON(http.StatusOK, updatedEvent)
@@ -190,11 +280,19 @@ func (app *application) updateEvent(c *gin.Context){
 // @Failure 500 {object} gin.H "Internal server error"
 // @Security BearerAuth
 // @Router /api/v1/events/{id} [delete]
+<<<<<<< HEAD
 func (app *application) deleteEvent(c *gin.Context){
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID"})
 		return 
+=======
+func (app *application) deleteEvent(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID"})
+		return
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 	}
 
 	user := app.getUserFromContext(c)
@@ -203,11 +301,16 @@ func (app *application) deleteEvent(c *gin.Context){
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve event"})
+<<<<<<< HEAD
 		return 
+=======
+		return
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 	}
 
 	if existingEvent == nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Event not found"})
+<<<<<<< HEAD
 		return 
 	}
 
@@ -219,6 +322,19 @@ func (app *application) deleteEvent(c *gin.Context){
 	if err := app.models.Events.Delete(id); err != nil{
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete event"})
 		return 
+=======
+		return
+	}
+
+	if existingEvent.OwnerId != user.Id {
+		c.JSON(http.StatusForbidden, gin.H{"error": "You do not have permission to delete this event"})
+		return
+	}
+
+	if err := app.models.Events.Delete(id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete event"})
+		return
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 	}
 
 	c.JSON(http.StatusNoContent, nil)
@@ -245,11 +361,19 @@ func (app *application) deleteEvent(c *gin.Context){
 // @Failure 500 {object} gin.H "Internal server error"
 // @Security BearerAuth
 // @Router /api/v1/events/{id}/attendees/{userId} [post]
+<<<<<<< HEAD
 func (app *application) addAttendeeToEvent(c *gin.Context){
 	eventId, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID"})
 		return 
+=======
+func (app *application) addAttendeeToEvent(c *gin.Context) {
+	eventId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID"})
+		return
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 	}
 
 	userId, err := strconv.Atoi(c.Param("userId"))
@@ -262,16 +386,28 @@ func (app *application) addAttendeeToEvent(c *gin.Context){
 	event, err := app.models.Events.Get(eventId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve event"})
+<<<<<<< HEAD
 		return 
 	}
 	if event == nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Event not found"})
 		return 
+=======
+		return
+	}
+	if event == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Event not found"})
+		return
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 	}
 
 	// Verify the user to be added exists before proceeding
 	userToAdd, err := app.models.Users.GetUserByID(userId)
+<<<<<<< HEAD
 	if err != nil{
+=======
+	if err != nil {
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user"})
 		return
 	}
@@ -282,6 +418,7 @@ func (app *application) addAttendeeToEvent(c *gin.Context){
 
 	user := app.getUserFromContext(c)
 
+<<<<<<< HEAD
 	if event.OwnerId != user.Id{
 		c.JSON(http.StatusForbidden, gin.H{"error": "You do not have permission to add attendees to this event"})
 		return 
@@ -291,6 +428,17 @@ func (app *application) addAttendeeToEvent(c *gin.Context){
     // This prevents duplicate registrations
 	existingAttendee, err := app.models.Attendees.GetByEventAndAttendee(event.Id, userToAdd.Id)
 	if err != nil{
+=======
+	if event.OwnerId != user.Id {
+		c.JSON(http.StatusForbidden, gin.H{"error": "You do not have permission to add attendees to this event"})
+		return
+	}
+
+	// Check if the user is already registered as an attendee for this event
+	// This prevents duplicate registrations
+	existingAttendee, err := app.models.Attendees.GetByEventAndAttendee(event.Id, userToAdd.Id)
+	if err != nil {
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve attendee"})
 		return
 	}
@@ -302,7 +450,11 @@ func (app *application) addAttendeeToEvent(c *gin.Context){
 	// Create new attendee relationship record
 	attendee := database.Attendee{
 		EventId: event.Id,
+<<<<<<< HEAD
 		UserId: userToAdd.Id,
+=======
+		UserId:  userToAdd.Id,
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 	}
 
 	// Insert the new attendee relationship into the database
@@ -329,13 +481,39 @@ func (app *application) addAttendeeToEvent(c *gin.Context){
 // @Failure 400 {object} gin.H "Invalid event ID"
 // @Failure 500 {object} gin.H "Internal server error"
 // @Router /api/v1/events/{id}/attendees [get]
+<<<<<<< HEAD
 func (app *application) getAttendeesForEvent(c *gin.Context){
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil{
+=======
+func (app *application) getAttendeesForEvent(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID"})
 		return
 	}
 
+<<<<<<< HEAD
+=======
+	// Ensure the authenticated user owns the event before revealing attendees
+	event, err := app.models.Events.Get(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve event"})
+		return
+	}
+	if event == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Event not found"})
+		return
+	}
+
+	user := app.getUserFromContext(c)
+	if event.OwnerId != user.Id {
+		c.JSON(http.StatusForbidden, gin.H{"error": "You do not have permission to view attendees for this event"})
+		return
+	}
+
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 	// Fetch all users who are registered as attendees for this event
 	users, err := app.models.Attendees.GetAttendeesByEvent(id)
 	if err != nil {
@@ -366,11 +544,19 @@ func (app *application) getAttendeesForEvent(c *gin.Context){
 // @Failure 500 {object} gin.H "Internal server error"
 // @Security BearerAuth
 // @Router /api/v1/events/{id}/attendees/{userId} [delete]
+<<<<<<< HEAD
 func (app *application) deleteAttendeeFromEvent(c *gin.Context){
 	eventId, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID"})
 		return 
+=======
+func (app *application) deleteAttendeeFromEvent(c *gin.Context) {
+	eventId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID"})
+		return
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 	}
 
 	userId, err := strconv.Atoi(c.Param("userId"))
@@ -380,7 +566,11 @@ func (app *application) deleteAttendeeFromEvent(c *gin.Context){
 	}
 
 	event, err := app.models.Events.Get(eventId)
+<<<<<<< HEAD
 	if err != nil{
+=======
+	if err != nil {
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve event"})
 		return
 	}
@@ -391,7 +581,11 @@ func (app *application) deleteAttendeeFromEvent(c *gin.Context){
 	}
 
 	user := app.getUserFromContext(c)
+<<<<<<< HEAD
 	if event.OwnerId != user.Id{
+=======
+	if event.OwnerId != user.Id {
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 		c.JSON(http.StatusForbidden, gin.H{"error": "You do not have permission to delete an attendee from an event"})
 		return
 	}
@@ -420,7 +614,11 @@ func (app *application) deleteAttendeeFromEvent(c *gin.Context){
 // @Failure 400 {object} gin.H "Invalid attendee ID"
 // @Failure 500 {object} gin.H "Internal server error"
 // @Router /api/v1/events/{id}/attendees/{userId} [get]
+<<<<<<< HEAD
 func (app *application) getEventsByAttendee(c *gin.Context){
+=======
+func (app *application) getEventsByAttendee(c *gin.Context) {
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 	id, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid attendee ID"})
@@ -436,4 +634,8 @@ func (app *application) getEventsByAttendee(c *gin.Context){
 
 	// Return the list of events the user is attending
 	c.JSON(http.StatusOK, events)
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)

@@ -23,6 +23,14 @@ A production-ready REST API for event management with user authentication, built
    ```bash
    go run ./cmd/api
    # Or with live reload: air
+<<<<<<< HEAD
+=======
+   If air is not installed, try this:
+   go install github.com/air-verse/air@latest
+   echo 'export PATH=$PATH:$(go env GOPATH)/bin' >> ~/.bashrc
+   source ~/.bashrc
+   air -v
+>>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
    ```
 
 4. **Access Swagger documentation:**
