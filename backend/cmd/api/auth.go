@@ -13,21 +13,21 @@ import (
 // registerRequest defines the expected JSON structure for user registration requests.
 // All fields are required and validated using Gin's binding tags.
 type registerRequest struct {
-	Email    string `json:"email" binding:"required,email"`      // Must be valid email format
-	Password string `json:"password" binding:"required,min=8"`   // Minimum 8 characters for security
-	Name     string `json:"name" binding:"required,min=2"`       // Minimum 2 characters for user display name
+	Email    string `json:"email" binding:"required,email"`    // Must be valid email format
+	Password string `json:"password" binding:"required,min=8"` // Minimum 8 characters for security
+	Name     string `json:"name" binding:"required,min=2"`     // Minimum 2 characters for user display name
 }
 
 // loginRequest defines the expected JSON structure for user authentication requests.
 // Contains credentials needed for user login validation.
-type loginRequest struct{
-	Email    string `json:"email" binding:"required,email"`      // User's registered email address
-	Password string `json:"password" binding:"required,min=8"`   // User's plaintext password for verification
+type loginRequest struct {
+	Email    string `json:"email" binding:"required,email"`    // User's registered email address
+	Password string `json:"password" binding:"required,min=8"` // User's plaintext password for verification
 }
 
 // loginResponse defines the JSON structure returned upon successful authentication.
 // Contains the JWT token that clients should include in subsequent authenticated requests.
-type loginResponse struct{
+type loginResponse struct {
 	Token string `json:"token"`
 }
 
@@ -46,7 +46,7 @@ type loginResponse struct{
 // @Failure 401 {object} gin.H "Invalid credentials"
 // @Failure 500 {object} gin.H "Internal server error"
 // @Router /api/v1/auth/login [post]
-func (app *application) login(c *gin.Context){
+func (app *application) login(c *gin.Context) {
 	var auth loginRequest
 	if err := c.ShouldBindJSON(&auth); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -56,7 +56,7 @@ func (app *application) login(c *gin.Context){
 	existingUser, err := app.models.Users.GetByEmail(auth.Email)
 	if existingUser == nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
-		return 
+		return
 	}
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user"})
@@ -64,25 +64,25 @@ func (app *application) login(c *gin.Context){
 	}
 
 	// Compare provided password with stored bcrypt hash
-    // bcrypt.CompareHashAndPassword is constant-time to prevent timing attacks
-	err = bcrypt.CompareHashAndPassword([]byte(existingUser.Password), []byte(auth.Password))	
+	// bcrypt.CompareHashAndPassword is constant-time to prevent timing attacks
+	err = bcrypt.CompareHashAndPassword([]byte(existingUser.Password), []byte(auth.Password))
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
-		return 
+		return
 	}
-	
+
 	// Create JWT token with user ID and expiration claims
-    // Token expires in 72 hours for reasonable session duration
+	// Token expires in 72 hours for reasonable session duration
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userId": existingUser.Id,
 		"exp":    time.Now().Add(time.Hour * 72).Unix(),
 	})
-	
+
 	// Sign the token with the application's secret key
 	tokenString, err := token.SignedString([]byte(app.jwtSecret))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
-		return 
+		return
 	}
 
 	// Return the signed JWT token for client-side storage and future requests
@@ -107,40 +107,38 @@ func (app *application) registerUser(c *gin.Context) {
 	var register registerRequest
 	if err := c.ShouldBindJSON(&register); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return 
+		return
 	}
 
 	// Hash the plaintext password using bcrypt with default cost factor (10)
-    // bcrypt is adaptive and includes salt generation automatically
+	// bcrypt is adaptive and includes salt generation automatically
 	hashPassword, err := bcrypt.GenerateFromPassword([]byte(register.Password), bcrypt.DefaultCost)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
 		return
 	}
 
-	register.Password = string(hashPassword)
 	user := database.User{
-		Email: register.Email,
-		Password: register.Password,
-		Name: register.Name,
+		Email:    register.Email,
+		Password: string(hashPassword),
+		Name:     register.Name,
 	}
 
-	// Generate JWT token for newly registered user 
+	if err := app.models.Users.Insert(&user); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register user"})
+		return
+	}
+
+	// Generate JWT token for newly registered user using the persisted ID
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userId": user.Id,
-		"exp": time.Now().Add(time.Hour * 72).Unix(),
+		"exp":    time.Now().Add(time.Hour * 72).Unix(),
 	})
 
 	tokenString, err := token.SignedString([]byte(app.jwtSecret))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})	
-		return 
-	}
-
-	err = app.models.Users.Insert(&user)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register user"})
-		return 
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully", "user": user, "token": tokenString})

@@ -1,11 +1,8 @@
 package main
 
 import (
-<<<<<<< HEAD
-=======
 	"database/sql"
 	"errors"
->>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 	"net/http"
 	"strconv"
 
@@ -39,28 +36,39 @@ func (app *application) getUserByID(c *gin.Context) {
 		return
 	}
 
+	if user == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
 	c.JSON(http.StatusOK, user)
-<<<<<<< HEAD
-=======
 }
 
-
-func (app *application) deleteCurrentUser(c *gin.Context){
+func (app *application) getCurrentUser(c *gin.Context) {
 	user := app.getUserFromContext(c)
-	if user == nil {
+	if user == nil || user.Id == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
+
+func (app *application) deleteCurrentUser(c *gin.Context) {
+	user := app.getUserFromContext(c)
+	if user == nil || user.Id == 0 {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
 
 	if err := app.models.Users.Delete(c.Request.Context(), user.Id); err != nil {
-		if errors.Is(err, sql.ErrNoRows){
+		if errors.Is(err, sql.ErrNoRows) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
-		return 
+		return
 	}
 
 	c.Status(http.StatusNoContent)
->>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 }

@@ -1,14 +1,8 @@
 "use client";
 import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "./ui/button";
-<<<<<<< HEAD
-import { LogIn, LogOut, Moon, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-=======
 import { LogIn, LogOut, Moon, Settings, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -21,40 +15,37 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { is } from "zod/v4/locales";
->>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
+import { Input } from "./ui/input";
+
+const DEFAULT_AVATAR =
+  "https://www.htgtrading.co.uk/wp-content/uploads/2016/03/no-user-image-square.jpg";
 
 export function Navbar() {
   const { theme, setTheme } = useTheme();
   const pathname = usePathname();
-<<<<<<< HEAD
-  const router = useRouter();
-  const { isAuthed, isLoading, logout } = useAuth();
-=======
   const { isAuthed, isLoading, logout, user } = useAuth();
->>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  const avatarSrc = user?.profile_picture || DEFAULT_AVATAR;
+  const avatarFallback =
+    (
+      user?.name?.charAt(0) ||
+      user?.email?.charAt(0) ||
+      user?.id?.toString().charAt(0) ||
+      "?"
+    )?.toUpperCase() || "?";
+
   function handleLogout() {
     logout();
-<<<<<<< HEAD
-    router.push("/login");
-  }
-
-  return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
-      <div className="mx-auto flex h-14 max-w-screen-2xl items-center px-4 md:px-6 lg:px-8">
-=======
   }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 px-6">
       <div className="mx-auto flex h-14 max-w-screen-2xl items-center md:px-6 lg:px-8">
->>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
         {/* Desktop Navigation Section */}
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
@@ -98,9 +89,7 @@ export function Navbar() {
 
         {/* Right Side Actions */}
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-          <div className="w-full flex-1 md:w-auto md:flex-none">
-            {/* Future search functionality */}
-          </div>
+          <div className="w-full flex-1 md:w-auto md:flex-none" />
 
           <nav className="flex items-center gap-2">
             {/* Theme Toggle */}
@@ -132,37 +121,27 @@ export function Navbar() {
                   </Link>
                 </Button>
               ) : (
-<<<<<<< HEAD
-                <Button size="sm" variant="outline" onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Logout
-                </Button>
-=======
                 <DropdownMenu>
-                  <DropdownMenuTrigger>
-                    <Avatar>
-                      <AvatarImage
-                        src={
-                          "https://www.htgtrading.co.uk/wp-content/uploads/2016/03/no-user-image-square.jpg"
-                        }
-                        alt="User Avatar"
-                      />
-                      <AvatarFallback>
-                        <span className="sr-only">User Menu</span>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full h-9 w-9 p-0"
+                    >
+                      <Avatar className="h-9 w-9">
                         <AvatarImage
-                          src={
-                            "https://www.htgtrading.co.uk/wp-content/uploads/2016/03/no-user-image-square.jpg"
-                          }
-                          alt="User Avatar"
+                          src={avatarSrc}
+                          alt={user?.name ?? user?.email ?? "User avatar"}
                         />
-                      </AvatarFallback>
-                    </Avatar>
+                        <AvatarFallback>{avatarFallback}</AvatarFallback>
+                      </Avatar>
+                    </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent>
+                  <DropdownMenuContent align="end" className="w-60">
                     <DropdownMenuLabel className="font-normal">
-                      <div className="flex flex-col">
+                      <div className="flex flex-col gap-1">
                         <span className="text-sm font-semibold">
-                          User #{user?.id ?? "-"}
+                          {user?.name || "User"} (#{user?.id ?? "-"})
                         </span>
                         <span className="text-xs text-muted-foreground">
                           {user?.email ?? "No email available"}
@@ -170,7 +149,7 @@ export function Navbar() {
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuGroup>
-                      <DropdownMenuItem>
+                      <DropdownMenuItem asChild>
                         <Button size="sm" variant="ghost">
                           <Link
                             href="/settings"
@@ -181,14 +160,14 @@ export function Navbar() {
                           </Link>
                         </Button>
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
+                      <DropdownMenuItem asChild>
                         <Button
                           size="sm"
                           variant="ghost"
                           onClick={handleLogout}
                         >
                           <Link
-                            href={"/login"}
+                            href="/login"
                             className="flex items-center gap-1"
                           >
                             <LogOut className="mr-2 h-4 w-4 text-destructive" />
@@ -199,7 +178,6 @@ export function Navbar() {
                     </DropdownMenuGroup>
                   </DropdownMenuContent>
                 </DropdownMenu>
->>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
               )
             ) : (
               <Button asChild size="sm" disabled>

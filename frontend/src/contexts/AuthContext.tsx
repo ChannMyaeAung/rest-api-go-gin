@@ -1,42 +1,36 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import Cookies from "js-cookie";
-<<<<<<< HEAD
-=======
 import { AuthUser } from "@/lib/types";
 import { api } from "@/lib/api";
->>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
 
 interface AuthContextType {
   isAuthed: boolean;
   isLoading: boolean;
-<<<<<<< HEAD
-=======
   user: AuthUser | null;
->>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
-  login: (token: string) => void;
+  login: (token: string) => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
 }
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthed, setIsAuthed] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-<<<<<<< HEAD
-
-  useEffect(() => {
-    const token = Cookies.get("token");
-    setIsAuthed(Boolean(token));
-    setIsLoading(false);
-  }, []);
-
-  const login = (token: string) => {
-    Cookies.set("token", token, { expires: 7 });
-    setIsAuthed(true);
-=======
   const [user, setUser] = useState<AuthUser | null>(null);
+
+  const fetchUserProfile = useCallback(async () => {
+    const { data } = await api.get<{ user: AuthUser }>("/auth/me");
+    setUser(data.user);
+    setIsAuthed(true);
+  }, []);
 
   useEffect(() => {
     const token = Cookies.get("token");
@@ -44,54 +38,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
       return;
     }
-    setIsAuthed(true);
-    async () => {
-      try {
-        const { data } = await api.get("/auth/me");
-      } catch {
+
+    fetchUserProfile()
+      .catch(() => {
         Cookies.remove("token");
-        setIsAuthed(false);
         setUser(null);
+        setIsAuthed(false);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [fetchUserProfile]);
+
+  const login = useCallback(
+    async (token: string) => {
+      Cookies.set("token", token, { expires: 7 });
+      setIsLoading(true);
+
+      try {
+        await fetchUserProfile();
       } finally {
         setIsLoading(false);
       }
-    };
-    setIsLoading(false);
-  }, []);
+    },
+    [fetchUserProfile]
+  );
 
-  const login = async (token: string) => {
-    Cookies.set("token", token, { expires: 7 });
-    setIsAuthed(true);
-    setIsLoading(false);
-    try {
-      const { data } = await api.get("/auth/me");
-      setUser(data.user);
-    } catch {
-      Cookies.remove("token");
-      setIsAuthed(false);
-      setUser(null);
-      throw new Error("Unable to fetch user profile after login");
-    } finally {
-      setIsLoading(false);
-    }
->>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
-  };
-
-  const logout = () => {
+  const logout = useCallback(() => {
     Cookies.remove("token");
     setIsAuthed(false);
-<<<<<<< HEAD
-  };
-
-  return (
-    <AuthContext.Provider value={{ isAuthed, isLoading, login, logout }}>
-=======
     setUser(null);
-  };
+  }, []);
+
+  const refreshUser = useCallback(async () => {
+    try {
+      await fetchUserProfile();
+    } catch (error) {
+      Cookies.remove("token");
+      setUser(null);
+      setIsAuthed(false);
+      throw error;
+    }
+  }, [fetchUserProfile]);
 
   return (
-    <AuthContext.Provider value={{ isAuthed, isLoading, user, login, logout }}>
->>>>>>> b2b83c2 (Added add-attendee page, menus for profile and settings)
+    <AuthContext.Provider
+      value={{ isAuthed, isLoading, user, login, logout, refreshUser }}
+    >
       {children}
     </AuthContext.Provider>
   );
