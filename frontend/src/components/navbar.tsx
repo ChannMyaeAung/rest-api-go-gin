@@ -15,7 +15,6 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Input } from "./ui/input";
 
 const DEFAULT_AVATAR =
   "https://www.htgtrading.co.uk/wp-content/uploads/2016/03/no-user-image-square.jpg";
@@ -141,7 +140,7 @@ export function Navbar() {
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col gap-1">
                         <span className="text-sm font-semibold">
-                          {user?.name || "User"} (#{user?.id ?? "-"})
+                          {user?.name || "User"} (#Id: {user?.id ?? "—"})
                         </span>
                         <span className="text-xs text-muted-foreground">
                           {user?.email ?? "No email available"}

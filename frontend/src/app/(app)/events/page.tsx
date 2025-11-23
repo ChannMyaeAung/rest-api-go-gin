@@ -11,6 +11,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays, MapPin, Plus, Search, Trash2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const fetcher = (url: string) => api.get(url).then((r) => r.data);
 
@@ -35,10 +46,7 @@ export default function EventsPage() {
     );
   }, [data, q]);
 
-  const handleDelete = async (eventId: number, eventName: string) => {
-    if (!window.confirm(`Delete "${eventName}"? This action cannot be undone.`))
-      return;
-
+  const handleDelete = async (eventId: number) => {
     try {
       setDeletingId(eventId);
       await api.delete(`/events/${eventId}`);
@@ -218,15 +226,38 @@ export default function EventsPage() {
                       >
                         <Link href={`/events/${ev.id}`}>View Details</Link>
                       </Button>
-                      <Button
-                        variant="secondary"
-                        className="w-full text-destructive hover:text-destructive"
-                        onClick={() => handleDelete(ev.id, ev.name)}
-                        disabled={deletingId === ev.id}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        {deletingId === ev.id ? "Deleting..." : "Delete"}
-                      </Button>
+
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button size={"sm"} variant={"destructive"}>
+                            <Trash2 className="h-4 w-4 mr-1" />
+                            {deletingId === ev.id ? "Deleting..." : "Delete"}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              Delete &ldquo;{ev.name}&rdquo;?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will premanently remove the event and its
+                              attendees.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel disabled={deletingId === ev.id}>
+                              Cancel
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDelete(ev.id)}
+                              className="bg-destructive text-foreground hover:bg-destructive/90 focus:ring-destructive"
+                              disabled={deletingId === ev.id}
+                            >
+                              Confirm delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </CardContent>
                 </Card>

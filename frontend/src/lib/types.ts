@@ -1,7 +1,7 @@
 export type AuthUser = {
   id: number;
   email: string;
-  name?: string;
+  name: string;
   profile_picture?: string | null;
 };
 export type User = { id: number; email: string; name: string };

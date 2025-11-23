@@ -1,15 +1,15 @@
 "use client";
 
+import Cookies from "js-cookie";
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useState,
-  useCallback,
 } from "react";
-import Cookies from "js-cookie";
-import { AuthUser } from "@/lib/types";
 import { api } from "@/lib/api";
+import { AuthUser } from "@/lib/types";
 
 interface AuthContextType {
   isAuthed: boolean;
@@ -19,16 +19,17 @@ interface AuthContextType {
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [isAuthed, setIsAuthed] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<AuthUser | null>(null);
 
-  const fetchUserProfile = useCallback(async () => {
-    const { data } = await api.get<{ user: AuthUser }>("/auth/me");
-    setUser(data.user);
+  const fetchProfile = useCallback(async () => {
+    const { data } = await api.get<AuthUser>("/auth/me");
+    setUser(data);
     setIsAuthed(true);
   }, []);
 
@@ -39,47 +40,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    fetchUserProfile()
+    fetchProfile()
       .catch(() => {
         Cookies.remove("token");
         setUser(null);
         setIsAuthed(false);
       })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [fetchUserProfile]);
+      .finally(() => setIsLoading(false));
+  }, [fetchProfile]);
 
   const login = useCallback(
     async (token: string) => {
       Cookies.set("token", token, { expires: 7 });
       setIsLoading(true);
-
       try {
-        await fetchUserProfile();
+        await fetchProfile();
+      } catch (error) {
+        Cookies.remove("token");
+        setUser(null);
+        setIsAuthed(false);
+        throw error;
       } finally {
         setIsLoading(false);
       }
     },
-    [fetchUserProfile]
+    [fetchProfile]
   );
 
   const logout = useCallback(() => {
     Cookies.remove("token");
-    setIsAuthed(false);
     setUser(null);
+    setIsAuthed(false);
   }, []);
 
   const refreshUser = useCallback(async () => {
     try {
-      await fetchUserProfile();
+      await fetchProfile();
     } catch (error) {
       Cookies.remove("token");
       setUser(null);
       setIsAuthed(false);
       throw error;
     }
-  }, [fetchUserProfile]);
+  }, [fetchProfile]);
 
   return (
     <AuthContext.Provider
@@ -92,8 +95,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
+  if (!context) throw new Error("useAuth must be used within AuthProvider");
   return context;
 }

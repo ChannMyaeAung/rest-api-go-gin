@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"strings"
 	"time"
 )
 
@@ -24,6 +26,13 @@ type User struct {
 	UpdatedAt      time.Time `json:"updated_at"`
 }
 
+type UpdateUserParams struct {
+	Name           *string
+	Email          *string
+	PasswordHash   []byte
+	ProfilePicture *string
+}
+
 var defaultTimeout = 3 * time.Second
 
 func (m *UserModel) Insert(user *User) error {
@@ -40,24 +49,72 @@ func (m *UserModel) getUser(query string, args ...interface{}) (*User, error) {
 	defer cancel()
 
 	var user User
-	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&user.Id, &user.Email, &user.Name, &user.Password)
+	var profile sql.NullString
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&user.Id, &user.Email, &user.Name, &user.Password, &profile)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
 		return nil, err
 	}
+	if profile.Valid {
+		user.ProfilePicture = &profile.String
+	} else {
+		user.ProfilePicture = nil
+	}
 	return &user, nil
 }
 
 func (m *UserModel) GetUserByID(id int) (*User, error) {
-	query := "SELECT * FROM users WHERE id = $1"
+	query := "SELECT id, email, name, password, profile_picture FROM users WHERE id = $1"
 	return m.getUser(query, id)
 }
 
 func (m *UserModel) GetByEmail(email string) (*User, error) {
-	query := "SELECT * FROM users WHERE email = $1"
+	query := "SELECT id, email, name, password, profile_picture FROM users WHERE email = $1"
 	return m.getUser(query, email)
+}
+
+func (m *UserModel) Update(ctx context.Context, id int, params UpdateUserParams) (*User, error) {
+	ctx, cancel := context.WithTimeout(ctx, defaultTimeout)
+	defer cancel()
+
+	setClauses := []string{}
+	args := make([]any, 0, 4)
+
+	if params.Name != nil {
+		setClauses = append(setClauses, "name = ?")
+		args = append(args, strings.TrimSpace(*params.Name))
+	}
+	if params.Email != nil {
+		setClauses = append(setClauses, "email = ?")
+		args = append(args, strings.TrimSpace(*params.Email))
+	}
+	if len(params.PasswordHash) > 0 {
+		setClauses = append(setClauses, "password = ?")
+		args = append(args, params.PasswordHash)
+	}
+
+	if params.ProfilePicture != nil {
+		setClauses = append(setClauses, "profile_picture = ?")
+		if strings.TrimSpace(*params.ProfilePicture) == "" {
+			args = append(args, nil)
+		} else {
+			args = append(args, strings.TrimSpace(*params.ProfilePicture))
+		}
+	}
+
+	if len(setClauses) == 0 {
+		return m.GetUserByID(id)
+	}
+
+	query := fmt.Sprintf("UPDATE users SET %s WHERE id = ?", strings.Join(setClauses, ", "))
+	args = append(args, id)
+	if _, err := m.DB.ExecContext(ctx, query, args...); err != nil {
+		return nil, err
+	}
+
+	return m.GetUserByID(id)
 }
 
 func (m *UserModel) Delete(ctx context.Context, id int) error {

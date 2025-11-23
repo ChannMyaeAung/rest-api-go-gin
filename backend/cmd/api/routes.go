@@ -13,6 +13,8 @@ import (
 func (app *application) routes() http.Handler {
 	g := gin.Default()
 
+	g.Static("/uploads", "./tmp/uploads") // serve uploaded avatars
+
 	g.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:5173", "http://localhost:3001"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -34,16 +36,23 @@ func (app *application) routes() http.Handler {
 		v1.POST("/auth/login", app.login)
 	}
 
-	// Protected group (requires JWT)
-	auth := v1.Group("/")
+	// Protected group (requires JWT). Use an empty path segment so
+	// downstream handlers generate clean /api/v1/... routes instead of //.
+	auth := v1.Group("")
 	auth.Use(app.AuthMiddleware())
 	{
+		// User management
 		auth.GET("/auth/me", app.getCurrentUser)
+		auth.PUT("/auth/me", app.updateCurrentUser)
 		auth.DELETE("/auth/me", app.deleteCurrentUser)
 		auth.GET("/users/:id", app.getUserByID)
+		auth.POST("/auth/me/avatar", app.uploadProfilePicture)
+
+		// Event queries
 		auth.GET("/events", app.getAllEvents)
 		auth.GET("/events/:id", app.getEventByID)
 
+		// Attendee management
 		auth.GET("/events/:id/attendees", app.getAttendeesForEvent)
 		auth.GET("/events/:id/attendees/:userId", app.getEventsByAttendee)
 		auth.POST("/events/:id/attendees/:userId", app.addAttendeeToEvent)
