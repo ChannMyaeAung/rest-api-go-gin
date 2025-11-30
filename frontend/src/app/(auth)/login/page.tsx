@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { api, getApiError } from "@/lib/api";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,7 +14,7 @@ import { loginSchema } from "@/lib/schema";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const params = useSearchParams();
   const from = params.get("from") || "/events";
@@ -95,5 +96,13 @@ export default function LoginPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-sm">Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

@@ -13,7 +13,7 @@ import (
 func (app *application) routes() http.Handler {
 	g := gin.Default()
 
-	g.Static("/uploads", "./tmp/uploads") // serve uploaded avatars
+	g.Static("/uploads", app.uploadDir) // serve uploaded avatars
 
 	g.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:5173", "http://localhost:3001"},

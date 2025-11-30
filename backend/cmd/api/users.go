@@ -143,13 +143,13 @@ func (app *application) uploadProfilePicture(c *gin.Context) {
 		return
 	}
 
-	if err := os.MkdirAll("./tmp/uploads", 0o755); err != nil {
+	if err := os.MkdirAll(app.uploadDir, 0o755); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create upload directory"})
 		return
 	}
 
 	filename := fmt.Sprintf("avatar_%d_%d%s", user.Id, time.Now().UnixNano(), ext)
-	path := filepath.Join("./tmp/uploads", filename)
+	path := filepath.Join(app.uploadDir, filename)
 
 	out, err := os.Create(path)
 	if err != nil {
